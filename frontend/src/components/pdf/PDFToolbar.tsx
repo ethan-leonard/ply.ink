@@ -42,9 +42,31 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
   const scalePercentage = Math.round(scale * 100)
 
   const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const page = parseInt(e.target.value, 10)
-    if (page >= 1 && page <= totalPages) {
+    const value = e.target.value
+    const page = parseInt(value, 10)
+    if (!isNaN(page) && page >= 1 && page <= totalPages) {
       onPageChange(page)
+    }
+  }
+
+  const handlePageInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow arrow keys for navigation within the input, but prevent page navigation
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
+        e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.stopPropagation()
+    }
+    // Handle Enter key to apply the page change
+    if (e.key === 'Enter') {
+      e.currentTarget.blur()
+    }
+  }
+
+  const handlePageInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const page = parseInt(value, 10)
+    // Reset to current page if invalid input
+    if (isNaN(page) || page < 1 || page > totalPages) {
+      e.target.value = currentPage.toString()
     }
   }
 
@@ -190,6 +212,8 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
               type="number"
               value={currentPage}
               onChange={handlePageInputChange}
+              onKeyDown={handlePageInputKeyDown}
+              onBlur={handlePageInputBlur}
               min={1}
               max={totalPages}
               disabled={loading}

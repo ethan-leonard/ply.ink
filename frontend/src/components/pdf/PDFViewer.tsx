@@ -131,19 +131,30 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!pdf) return
 
+      // Don't intercept keys when user is typing in an input
+      if (event.target instanceof HTMLInputElement || 
+          event.target instanceof HTMLTextAreaElement ||
+          event.target instanceof HTMLSelectElement) {
+        return
+      }
+
       switch (event.key) {
         case 'ArrowUp':
         case 'ArrowLeft':
           event.preventDefault()
           if (activePage > 1) {
-            setCurrentPage(activePage - 1)
+            const newPage = activePage - 1
+            setCurrentPage(newPage)
+            onPageChange?.(newPage)
           }
           break
         case 'ArrowDown':
         case 'ArrowRight':
           event.preventDefault()
           if (activePage < pdf.numPages) {
-            setCurrentPage(activePage + 1)
+            const newPage = activePage + 1
+            setCurrentPage(newPage)
+            onPageChange?.(newPage)
           }
           break
         case '+':
@@ -161,7 +172,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     // Use non-passive event listener for keyboard events too
     window.addEventListener('keydown', handleKeyDown, { passive: false })
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pdf, activePage])
+  }, [pdf, activePage, onPageChange])
 
   // Handle wheel zoom with native event listener to avoid passive event issues
   React.useEffect(() => {
@@ -233,21 +244,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   return (
     <div 
       className={cn(
-        "flex-1 overflow-auto bg-neutral-50 flex items-center justify-center",
+        "flex-1 overflow-auto bg-neutral-50",
         className
       )}
     >
-      <div className="p-8">
-        <canvas
-          ref={canvasRef}
-          className="pdf-canvas border border-border rounded-lg bg-white"
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+      <div className="min-h-full flex items-center justify-center p-8">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="pdf-canvas border border-border rounded-lg bg-white block"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-lg">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
