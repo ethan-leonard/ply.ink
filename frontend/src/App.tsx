@@ -174,7 +174,7 @@ const App: React.FC = () => {
       )}
 
       {/* Main content area */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex min-h-0">
         {/* PDF Viewer */}
         <PDFViewer
           file={currentFile}

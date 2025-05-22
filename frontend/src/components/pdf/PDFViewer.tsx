@@ -139,22 +139,58 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       }
 
       switch (event.key) {
-        case 'ArrowUp':
         case 'ArrowLeft':
           event.preventDefault()
           if (activePage > 1) {
             const newPage = activePage - 1
-            setCurrentPage(newPage)
-            onPageChange?.(newPage)
+            if (externalCurrentPage !== undefined) {
+              onPageChange?.(newPage)
+            } else {
+              setCurrentPage(newPage)
+            }
           }
           break
-        case 'ArrowDown':
         case 'ArrowRight':
           event.preventDefault()
           if (activePage < pdf.numPages) {
             const newPage = activePage + 1
-            setCurrentPage(newPage)
-            onPageChange?.(newPage)
+            if (externalCurrentPage !== undefined) {
+              onPageChange?.(newPage)
+            } else {
+              setCurrentPage(newPage)
+            }
+          }
+          break
+        case 'ArrowUp':
+          // Don't prevent default for arrow up/down to allow natural scrolling
+          // Only handle page navigation if we're at scroll boundaries
+          if (activePage > 1) {
+            const container = document.querySelector('.overflow-auto')
+            if (container && container.scrollTop === 0) {
+              event.preventDefault()
+              const newPage = activePage - 1
+              if (externalCurrentPage !== undefined) {
+                onPageChange?.(newPage)
+              } else {
+                setCurrentPage(newPage)
+              }
+            }
+          }
+          break
+        case 'ArrowDown':
+          // Don't prevent default for arrow up/down to allow natural scrolling
+          // Only handle page navigation if we're at scroll boundaries
+          if (activePage < pdf.numPages) {
+            const container = document.querySelector('.overflow-auto')
+            if (container && container.scrollTop + container.clientHeight >= container.scrollHeight - 5) {
+              event.preventDefault()
+              const newPage = activePage + 1
+              if (externalCurrentPage !== undefined) {
+                onPageChange?.(newPage)
+              } else {
+                setCurrentPage(newPage)
+              }
+            }
           }
           break
         case '+':
@@ -169,10 +205,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       }
     }
 
-    // Use non-passive event listener for keyboard events too
-    window.addEventListener('keydown', handleKeyDown, { passive: false })
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pdf, activePage, onPageChange])
+    // Use non-passive event listener for keyboard events
+    document.addEventListener('keydown', handleKeyDown, { passive: false })
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [pdf, activePage, externalCurrentPage])
 
   // Handle wheel zoom with native event listener to avoid passive event issues
   React.useEffect(() => {
@@ -244,16 +280,26 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   return (
     <div 
       className={cn(
-        "flex-1 overflow-auto bg-neutral-50",
+        "flex-1 overflow-auto bg-neutral-50 focus:outline-none pdf-scrollable min-h-0",
         className
       )}
+      tabIndex={0}
+      onClick={(e) => {
+        // Ensure the container has focus when clicked
+        e.currentTarget.focus()
+      }}
     >
-      <div className="min-h-full flex items-center justify-center p-8">
+      <div className="p-8 flex justify-center">
         <div className="relative">
           <canvas
             ref={canvasRef}
             className="pdf-canvas border border-border rounded-lg bg-white block"
-            style={{ maxWidth: '100%', height: 'auto' }}
+            style={{ 
+              height: 'auto',
+              width: 'auto',
+              maxWidth: 'none',
+              display: 'block'
+            }}
           />
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-lg">
