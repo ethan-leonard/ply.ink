@@ -16,14 +16,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onPageChange,
   scale: externalScale,
   currentPage: externalCurrentPage,
+  currentTool = 'cursor',
   className,
 }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
   const renderTaskRef = React.useRef<any>(null)
   const [pdf, setPdf] = React.useState<PDFDocumentProxy | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [loading, setLoading] = React.useState(false)
   const [scale, setScale] = React.useState(1.2)
+  const [isPanning, setIsPanning] = React.useState(false)
+  const [lastPanPoint, setLastPanPoint] = React.useState({ x: 0, y: 0 })
 
   // Use external values when provided
   const activeScale = externalScale ?? scale
@@ -244,6 +248,45 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [])
 
+  // Handle panning functionality
+  React.useEffect(() => {
+    if (currentTool !== 'hand') return
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.target === canvasRef.current) {
+        setIsPanning(true)
+        setLastPanPoint({ x: e.clientX, y: e.clientY })
+        e.preventDefault()
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning || !containerRef.current) return
+
+      const deltaX = e.clientX - lastPanPoint.x
+      const deltaY = e.clientY - lastPanPoint.y
+
+      containerRef.current.scrollLeft -= deltaX
+      containerRef.current.scrollTop -= deltaY
+
+      setLastPanPoint({ x: e.clientX, y: e.clientY })
+    }
+
+    const handleMouseUp = () => {
+      setIsPanning(false)
+    }
+
+    document.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [currentTool, isPanning, lastPanPoint])
+
   // Add cleanup for render task on unmount
   React.useEffect(() => {
     return () => {
@@ -279,8 +322,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   return (
     <div 
+      ref={containerRef}
       className={cn(
         "flex-1 overflow-auto bg-neutral-50 focus:outline-none pdf-scrollable min-h-0",
+        currentTool === 'hand' && 'cursor-grab',
+        isPanning && 'cursor-grabbing',
         className
       )}
       tabIndex={0}
@@ -293,12 +339,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         <div className="relative">
           <canvas
             ref={canvasRef}
-            className="pdf-canvas border border-border rounded-lg bg-white block"
+            className={cn(
+              "pdf-canvas border border-border rounded-lg bg-white block",
+              currentTool === 'cursor' && 'cursor-text',
+              currentTool === 'hand' && 'cursor-grab',
+              isPanning && 'cursor-grabbing'
+            )}
             style={{ 
               height: 'auto',
               width: 'auto',
               maxWidth: 'none',
-              display: 'block'
+              display: 'block',
+              userSelect: currentTool === 'cursor' ? 'text' : 'none'
             }}
           />
           {loading && (

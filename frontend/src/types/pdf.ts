@@ -21,18 +21,7 @@ export interface PDFRenderOptions {
   rotation?: number
 }
 
-/**
- * PDF viewer component props
- */
-export interface PDFViewerProps {
-  file: File | null
-  onLoadSuccess?: (pdf: PDFDocumentProxy) => void
-  onLoadError?: (error: Error) => void
-  onPageChange?: (pageNumber: number) => void
-  scale?: number
-  currentPage?: number
-  className?: string
-}
+
 
 /**
  * PDF toolbar component props
@@ -49,6 +38,9 @@ export interface PDFToolbarProps {
   onImportFile: () => void
   onExportFile: () => void
   onToggleSidebar: () => void
+  onClosePDF: () => void
+  onToolChange: (tool: ToolType) => void
+  currentTool: ToolType
   loading: boolean
   fileName: string | null
 }
@@ -56,4 +48,18 @@ export interface PDFToolbarProps {
 /**
  * Tool types for the PDF viewer toolbar
  */
-export type ToolType = 'cursor' | 'hand' | 'zoom-in' | 'zoom-out' 
+export type ToolType = 'cursor' | 'hand'
+
+/**
+ * PDF viewer component props with tool support
+ */
+export interface PDFViewerProps {
+  file: File | null
+  onLoadSuccess?: (pdf: PDFDocumentProxy) => void
+  onLoadError?: (error: Error) => void
+  onPageChange?: (pageNumber: number) => void
+  scale?: number
+  currentPage?: number
+  currentTool?: ToolType
+  className?: string
+} 

@@ -97,6 +97,19 @@
     background-color: rgba(156, 163, 175, 0.8);
   }
 
+  /* PDF viewer tool cursors */
+  .cursor-grab {
+    cursor: grab;
+  }
+
+  .cursor-grabbing {
+    cursor: grabbing;
+  }
+
+  .cursor-text {
+    cursor: text;
+  }
+
   /* Smooth transitions for hover states */
   .apple-transition {
     @apply transition-all duration-200 ease-out;

@@ -4,6 +4,7 @@ import { PDFToolbar } from "@/components/pdf/PDFToolbar"
 import { PDFViewer } from "@/components/pdf/PDFViewer"
 import { PDFSidebar } from "@/components/pdf/PDFSidebar"
 import { isPDFFile, downloadBlob } from "@/lib/pdf-worker"
+import type { ToolType } from "@/types/pdf"
 
 /**
  * Main ply.ink application component
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const [currentTool, setCurrentTool] = React.useState<ToolType>('cursor')
 
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -44,6 +46,17 @@ const App: React.FC = () => {
     }
   }, [])
 
+  // Handle PDF close
+  const handleClosePDF = React.useCallback(() => {
+    setCurrentFile(null)
+    setPdf(null)
+    setCurrentPage(1)
+    setTotalPages(0)
+    setScale(1.2)
+    setError(null)
+    setSidebarOpen(false)
+  }, [])
+
   // Handle file export
   const handleExportFile = React.useCallback(async () => {
     if (!currentFile) return
@@ -53,11 +66,19 @@ const App: React.FC = () => {
         type: 'application/pdf' 
       })
       downloadBlob(blob, currentFile.name)
+      
+      // Close the PDF after successful export
+      handleClosePDF()
     } catch (error) {
       console.error('Export failed:', error)
       setError('Failed to export PDF')
     }
-  }, [currentFile])
+  }, [currentFile, handleClosePDF])
+
+  // Handle tool change
+  const handleToolChange = React.useCallback((tool: ToolType) => {
+    setCurrentTool(tool)
+  }, [])
 
   // Handle PDF load success
   const handleLoadSuccess = React.useCallback((pdfDoc: PDFDocumentProxy) => {
@@ -162,6 +183,9 @@ const App: React.FC = () => {
         onImportFile={handleImportFile}
         onExportFile={handleExportFile}
         onToggleSidebar={handleToggleSidebar}
+        onClosePDF={handleClosePDF}
+        onToolChange={handleToolChange}
+        currentTool={currentTool}
         loading={loading}
         fileName={currentFile?.name || null}
       />
@@ -183,6 +207,7 @@ const App: React.FC = () => {
           onPageChange={handlePageChange}
           scale={scale}
           currentPage={currentPage}
+          currentTool={currentTool}
           className="flex-1"
         />
       </div>
@@ -215,15 +240,15 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs md:text-sm text-gray-400 max-w-lg mx-auto">
               <div className="flex items-center justify-center space-x-2">
                 <span className="font-medium">•</span>
-                <span>Arrow keys: Pages</span>
+                <span>Cursor/Hand tools</span>
               </div>
               <div className="flex items-center justify-center space-x-2">
                 <span className="font-medium">•</span>
-                <span>Ctrl + scroll: Zoom</span>
+                <span>Click & drag to pan</span>
               </div>
               <div className="flex items-center justify-center space-x-2">
                 <span className="font-medium">•</span>
-                <span>+/- keys: Zoom in/out</span>
+                <span>Arrow keys: Navigate</span>
               </div>
             </div>
           </div>

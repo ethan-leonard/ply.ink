@@ -36,6 +36,9 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
   onImportFile,
   onExportFile,
   onToggleSidebar,
+  onClosePDF,
+  onToolChange,
+  currentTool,
   loading,
   fileName,
 }) => {
@@ -123,31 +126,23 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
 
         {/* Center section - Tools */}
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="apple-transition"
-              >
-                <MousePointer2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Cursor Tool</TooltipContent>
-          </Tooltip>
+          <Button 
+            variant={currentTool === 'cursor' ? 'default' : 'ghost'}
+            size="icon"
+            onClick={() => onToolChange('cursor')}
+            className="apple-transition"
+          >
+            <MousePointer2 className="h-4 w-4" />
+          </Button>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="apple-transition"
-              >
-                <Hand className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Hand Tool</TooltipContent>
-          </Tooltip>
+          <Button 
+            variant={currentTool === 'hand' ? 'default' : 'ghost'}
+            size="icon"
+            onClick={() => onToolChange('hand')}
+            className="apple-transition"
+          >
+            <Hand className="h-4 w-4" />
+          </Button>
 
           <Separator orientation="vertical" className="h-6" />
 
