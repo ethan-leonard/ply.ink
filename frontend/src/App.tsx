@@ -215,7 +215,7 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs md:text-sm text-gray-400 max-w-lg mx-auto">
               <div className="flex items-center justify-center space-x-2">
                 <span className="font-medium">•</span>
-                <span>Arrow keys: Navigate pages</span>
+                <span>Arrow keys: Pages</span>
               </div>
               <div className="flex items-center justify-center space-x-2">
                 <span className="font-medium">•</span>

@@ -212,10 +212,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         "flex-1 flex items-center justify-center text-muted-foreground",
         className
       )}>
-        <div className="text-center">
-          <p className="text-lg mb-2">No PDF loaded</p>
-          <p className="text-sm">Import a PDF file to get started</p>
-        </div>
       </div>
     )
   }
