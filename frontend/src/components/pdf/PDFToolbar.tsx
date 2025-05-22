@@ -75,7 +75,7 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 apple-shadow">
+      <div className="flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 apple-shadow relative z-10">
         {/* Left section - File controls */}
         <div className="flex items-center gap-2">
           <Tooltip>
