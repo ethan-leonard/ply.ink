@@ -43,12 +43,27 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
   fileName,
 }) => {
   const scalePercentage = Math.round(scale * 100)
+  
+  // Local state for the page input to allow free typing
+  const [pageInputValue, setPageInputValue] = React.useState(currentPage.toString())
+
+  // Update local input value when currentPage changes externally
+  React.useEffect(() => {
+    setPageInputValue(currentPage.toString())
+  }, [currentPage])
 
   const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
+    // Allow any typing, we'll validate on blur/enter
+    setPageInputValue(e.target.value)
+  }
+
+  const applyPageChange = (value: string) => {
     const page = parseInt(value, 10)
     if (!isNaN(page) && page >= 1 && page <= totalPages) {
       onPageChange(page)
+    } else {
+      // Reset to current page if invalid
+      setPageInputValue(currentPage.toString())
     }
   }
 
@@ -60,17 +75,13 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
     }
     // Handle Enter key to apply the page change
     if (e.key === 'Enter') {
+      applyPageChange(pageInputValue)
       e.currentTarget.blur()
     }
   }
 
   const handlePageInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    const page = parseInt(value, 10)
-    // Reset to current page if invalid input
-    if (isNaN(page) || page < 1 || page > totalPages) {
-      e.target.value = currentPage.toString()
-    }
+    applyPageChange(e.target.value)
   }
 
   return (
@@ -205,7 +216,7 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
           <div className="flex items-center gap-1">
             <input
               type="number"
-              value={currentPage}
+              value={pageInputValue}
               onChange={handlePageInputChange}
               onKeyDown={handlePageInputKeyDown}
               onBlur={handlePageInputBlur}
