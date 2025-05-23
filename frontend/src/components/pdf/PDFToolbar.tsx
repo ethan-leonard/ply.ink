@@ -36,7 +36,6 @@ const PDFToolbar: React.FC<PDFToolbarProps> = ({
   onImportFile,
   onExportFile,
   onToggleSidebar,
-  onClosePDF,
   onToolChange,
   currentTool,
   loading,
