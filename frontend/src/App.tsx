@@ -229,7 +229,7 @@ const App: React.FC = () => {
               ply.ink
             </h1>
             <p className="text-lg md:text-xl text-gray-600 font-light">
-              Lightning-fast PDF viewer
+              ply <i>the sheet</i> · ink <i>the story</i>
             </p>
             <p className="text-base md:text-lg text-gray-500 mb-8">
               No PDF loaded
